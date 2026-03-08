@@ -4,7 +4,7 @@ services:
     runtime: python
     plan: free
     buildCommand: pip install -r requirements.txt
-    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    startCommand: uvicorn main:app --host 0.0.0.0 --port ${PORT:-3000}
     envVars:
       - key: TELEGRAM_BOT_TOKEN
         sync: false
@@ -14,6 +14,8 @@ services:
         sync: false
       - key: WEBHOOK_URL
         sync: false
+      - key: PORT
+        value: "3000"
       - key: TTS_VOICE
         value: en-US-JennyNeural
       - key: MAX_HISTORY
