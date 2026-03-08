@@ -1,0 +1,15 @@
+{
+  "servers": {
+    "n8n-mcp": {
+      "command": "npx",
+      "args": ["n8n-mcp@2.10.2"],
+      "env": {
+        "MCP_MODE": "stdio",
+        "LOG_LEVEL": "error",
+        "DISABLE_CONSOLE_OUTPUT": "true",
+        "N8N_API_URL": "https://n8n-icbgqqoa.ap-northeast-1.clawcloudrun.com",
+        "N8N_API_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1MTIyNzkwNC1jMmZiLTRiMWUtYjdhNS05MzEwMjliMmVhZTgiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwianRpIjoiYzQ5OGFiYzgtZTBiMi00NDAxLTkwNTItNTczYjYxNzRlYWY0IiwiaWF0IjoxNzcyOTQwOTA0LCJleHAiOjE3NzU0NDgwMDB9.mZdkreBxImaqMOULmQbgoy16ONJGqcZvQo5ZKGv7EOI"
+      }
+    }
+  }
+}
