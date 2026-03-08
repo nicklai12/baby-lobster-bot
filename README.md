@@ -40,7 +40,7 @@ FastAPI Server (Render Web Service)
 ├── services/
 │   ├── memory.py         # Per-chat 對話記憶（deque-based）
 │   ├── stt.py            # Groq Whisper 語音轉文字
-│   ├── ai.py             # Cerebras AI 對話（含 Baby Lobster system prompt）
+│   ├── ai.py             # Cerebras AI 對話（含 Baby Lobster system prompt + 429 自動重試）
 │   └── tts.py            # edge-tts 文字轉語音（Python API，非 CLI）
 ├── requirements.txt
 ├── Procfile              # Render 啟動指令
@@ -131,3 +131,10 @@ uvicorn main:app --reload  # 預設使用 PORT=3000
 ```
 
 使用 [ngrok](https://ngrok.com) 將本地 port 暴露為公開 HTTPS URL，並更新 `.env` 的 `WEBHOOK_URL`。
+
+---
+
+## 技術備註
+
+- **AI 429 自動重試：** `services/ai.py` 內建 exponential backoff，遇到 Cerebras API 429 (rate limit) 時自動等待 2s → 4s → 8s 重試，最多 3 次。
+- **edge-tts 版本：** 需使用 7.x 以上版本（目前 7.2.7），6.x 版會因 TrustedClientToken 過期導致 403 錯誤。
