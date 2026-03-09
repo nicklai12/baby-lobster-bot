@@ -8,3 +8,13 @@ build/
 venv/
 *.log
 /tmp/
+
+# Remotion Video Project
+remotion-video/node_modules/
+remotion-video/out/
+remotion-video/dist/
+remotion-video/.cache/
+remotion-video/package-lock.json
+remotion-video/*.mp4
+remotion-video/*.mov
+remotion-video/*.webm
