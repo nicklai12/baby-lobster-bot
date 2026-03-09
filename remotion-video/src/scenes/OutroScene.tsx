@@ -1,52 +1,79 @@
 import { useCurrentFrame, useVideoConfig, interpolate, Easing, spring } from "remotion";
+import { DESIGN_TOKENS } from "../Video";
+import { IconGraduationCap, IconPartyPopper, IconGithub, IconFileText, IconMessageCircle } from "../components/Icons";
 
 export const OutroScene: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  // Lobster celebration animation
+  const { micro, standard, emphasis } = DESIGN_TOKENS.animation;
+
+  // Celebration animation - Emphasis timing
   const celebration = spring({
     frame,
     fps,
     config: { damping: 8, stiffness: 60 },
   });
 
-  const scale = 1 + celebration * 0.2;
-  const rotate = Math.sin(frame * 0.1) * 10;
+  const scale = 1 + celebration * 0.15;
+  const rotate = Math.sin(frame * 0.08) * 8;
 
-  // Text animations
-  const titleOpacity = interpolate(frame, [0, 20], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  const titleScale = interpolate(frame, [0, 20], [0.8, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  // Text animations with easing
+  const titleOpacity = interpolate(frame, [0, standard.frames], [0, 1], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+    easing: standard.easing,
+  });
+  const titleScale = interpolate(frame, [0, standard.frames], [0.9, 1], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+    easing: standard.easing,
+  });
 
-  const subtitleOpacity = interpolate(frame, [20, 40], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const subtitleOpacity = interpolate(frame, [micro.frames, micro.frames + standard.frames], [0, 1], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+    easing: standard.easing,
+  });
 
-  const ctaOpacity = interpolate(frame, [50, 70], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  const ctaY = interpolate(frame, [50, 70], [30, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const ctaOpacity = interpolate(frame, [35, 50], [0, 1], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+    easing: standard.easing,
+  });
+  const ctaY = interpolate(frame, [35, 50], [20, 0], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+    easing: standard.easing,
+  });
 
-  // Confetti particles
-  const confetti = Array.from({ length: 30 }, (_, i) => ({
+  // Reduced confetti particles (Rule #7)
+  const confetti = Array.from({ length: 20 }, (_, i) => ({
     id: i,
-    x: 100 + (i * 60) % 1720,
-    y: -50 - (i * 30) % 200,
-    color: ["#ff6b6b", "#4ecdc4", "#ffe66d", "#a8e6cf", "#ff8e53"][i % 5],
+    x: 150 + (i * 85) % 1620,
+    y: -30 - (i * 40) % 150,
+    color: [DESIGN_TOKENS.colors.primary, DESIGN_TOKENS.colors.secondary, DESIGN_TOKENS.colors.accent, "#22C55E"][i % 4],
     delay: i * 2,
-    speed: 3 + (i % 4),
+    speed: 2.5 + (i % 3),
   }));
 
   return (
-    <div style={{
-      width: "100%",
-      height: "100%",
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      justifyContent: "center",
-      position: "relative",
-    }}>
-      {/* Confetti */}
+    <div
+      style={{
+        width: "100%",
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        position: "relative",
+        zIndex: DESIGN_TOKENS.zIndex.content,
+      }}
+    >
+      {/* Confetti - reduced for less distraction */}
       {confetti.map((c) => {
         const y = c.y + (frame - c.delay) * c.speed;
-        const rotation = (frame - c.delay) * 3;
+        const rotation = (frame - c.delay) * 2;
         const opacity = y > 1080 ? 0 : 1;
 
         return (
@@ -56,132 +83,186 @@ export const OutroScene: React.FC = () => {
               position: "absolute",
               left: c.x,
               top: y,
-              width: 12,
-              height: 12,
+              width: 10,
+              height: 10,
               background: c.color,
               transform: `rotate(${rotation}deg)`,
-              opacity: opacity * (frame > c.delay ? 1 : 0),
+              opacity: opacity * (frame > c.delay ? 0.7 : 0),
             }}
           />
         );
       })}
 
       {/* Main content */}
-      <div style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        zIndex: 1,
-      }}>
-        {/* Celebrating Lobster */}
-        <div style={{
-          fontSize: 180,
-          transform: `scale(${scale}) rotate(${rotate}deg)`,
-          filter: "drop-shadow(0 0 50px rgba(255, 107, 107, 0.8))",
-          marginBottom: 40,
-          opacity: titleOpacity,
-        }}>
-          🦞🎉
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          zIndex: 1,
+        }}
+      >
+        {/* Celebrating icons - Claymorphism style */}
+        <div
+          style={{
+            display: "flex",
+            gap: 20,
+            transform: `scale(${scale}) rotate(${rotate}deg)`,
+            filter: `drop-shadow(0 ${30 * (0.5 + Math.sin(frame * 0.1) * 0.3)}px ${50 * (0.5 + Math.sin(frame * 0.1) * 0.3)}px ${DESIGN_TOKENS.colors.primary}70)`,
+            marginBottom: DESIGN_TOKENS.spacing.lg,
+            padding: "25px 35px",
+            borderRadius: "50%",
+            background: `linear-gradient(145deg, ${DESIGN_TOKENS.colors.primary}25, ${DESIGN_TOKENS.colors.primary}08)`,
+            boxShadow: `
+              25px 25px 50px rgba(0,0,0,0.3),
+              -25px -25px 50px rgba(255,255,255,0.05),
+              inset 0 1px 0 rgba(255,255,255,0.1)
+            `,
+            opacity: titleOpacity,
+          }}
+        >
+          <IconGraduationCap size={80} color={DESIGN_TOKENS.colors.primaryLight} strokeWidth={1.5} />
+          <IconPartyPopper size={80} color={DESIGN_TOKENS.colors.accent} strokeWidth={1.5} />
         </div>
 
         {/* Title */}
-        <h2 style={{
-          fontSize: 72,
-          fontWeight: 900,
-          color: "#fff",
-          margin: 0,
-          opacity: titleOpacity,
-          transform: `scale(${titleScale})`,
-          textShadow: "0 0 60px rgba(255, 107, 107, 0.6), 0 4px 20px rgba(0,0,0,0.3)",
-          letterSpacing: "-2px",
-        }}>
+        <h2
+          style={{
+            fontSize: 56,
+            fontWeight: DESIGN_TOKENS.typography.hero.weight,
+            color: DESIGN_TOKENS.colors.text.primary,
+            margin: 0,
+            opacity: titleOpacity,
+            transform: `scale(${titleScale})`,
+            textShadow: `0 0 60px ${DESIGN_TOKENS.colors.primary}60, 0 4px 20px rgba(0,0,0,0.3)`,
+            letterSpacing: "-1px",
+          }}
+        >
           開始你的英文學習之旅！
         </h2>
 
         {/* Subtitle */}
-        <p style={{
-          fontSize: 32,
-          color: "rgba(255,255,255,0.9)",
-          marginTop: 25,
-          opacity: subtitleOpacity,
-          textAlign: "center",
-          maxWidth: 900,
-          lineHeight: 1.5,
-        }}>
-          Baby Lobster 期待與你一起探索英文的世界 🌟
+        <p
+          style={{
+            fontSize: DESIGN_TOKENS.typography.subtitle.size,
+            color: DESIGN_TOKENS.colors.text.secondary,
+            marginTop: DESIGN_TOKENS.spacing.md,
+            opacity: subtitleOpacity,
+            textAlign: "center",
+            maxWidth: 800,
+            lineHeight: 1.5,
+          }}
+        >
+          Baby Lobster 期待與你一起探索英文的世界
         </p>
 
-        {/* CTA Button */}
-        <div style={{
-          marginTop: 60,
-          padding: "25px 60px",
-          background: "linear-gradient(135deg, #ff6b6b, #ff8e53)",
-          borderRadius: 50,
-          fontSize: 28,
-          fontWeight: 700,
-          color: "#fff",
-          boxShadow: `0 10px 40px rgba(255, 107, 107, ${0.5 + Math.sin(frame * 0.1) * 0.3})`,
-          opacity: ctaOpacity,
-          transform: `translateY(${ctaY}px)`,
-          cursor: "pointer",
-          display: "flex",
-          alignItems: "center",
-          gap: 15,
-        }}>
-          <span>📱</span>
+        {/* CTA Button - Claymorphism style with glow */}
+        <div
+          style={{
+            marginTop: DESIGN_TOKENS.spacing.xl,
+            padding: "22px 50px",
+            background: `linear-gradient(135deg, ${DESIGN_TOKENS.colors.primary}, ${DESIGN_TOKENS.colors.secondary})`,
+            borderRadius: 50,
+            fontSize: 22,
+            fontWeight: 700,
+            color: DESIGN_TOKENS.colors.text.primary,
+            boxShadow: `
+              0 10px 40px ${DESIGN_TOKENS.colors.primary}${Math.floor((0.5 + Math.sin(frame * 0.1) * 0.3) * 80).toString(16).padStart(2, '0')},
+              inset 0 1px 0 rgba(255,255,255,0.2)
+            `,
+            opacity: ctaOpacity,
+            transform: `translateY(${ctaY}px)`,
+            display: "flex",
+            alignItems: "center",
+            gap: 12,
+            cursor: "pointer",
+            // Active state feedback (Rule #30)
+            transition: "transform 150ms ease-out, box-shadow 150ms ease-out",
+          }}
+        >
+          <IconMessageCircle size={24} />
           <span>立即在 Telegram 體驗</span>
         </div>
 
-        {/* Social/Links */}
-        <div style={{
-          display: "flex",
-          gap: 30,
-          marginTop: 50,
-          opacity: interpolate(frame, [80, 100], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }),
-        }}>
+        {/* Social/Links with Lucide icons */}
+        <div
+          style={{
+            display: "flex",
+            gap: 24,
+            marginTop: 40,
+            opacity: interpolate(frame, [60, 75], [0, 1], {
+              extrapolateLeft: "clamp",
+              extrapolateRight: "clamp",
+              easing: standard.easing,
+            }),
+          }}
+        >
           {[
-            { icon: "🐙", text: "GitHub" },
-            { icon: "📖", text: "文件" },
-            { icon: "💬", text: "Telegram" },
-          ].map((link, i) => (
-            <div key={i} style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-              padding: "12px 24px",
-              background: "rgba(255,255,255,0.1)",
-              borderRadius: 25,
-              fontSize: 16,
-              color: "rgba(255,255,255,0.8)",
-              border: "1px solid rgba(255,255,255,0.2)",
-            }}>
-              <span>{link.icon}</span>
-              <span>{link.text}</span>
+            { Icon: IconGithub, text: "GitHub" },
+            { Icon: IconFileText, text: "文件" },
+            { Icon: IconMessageCircle, text: "Telegram" },
+          ].map(({ Icon, text }, i) => (
+            <div
+              key={i}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                padding: "10px 20px",
+                background: "rgba(255,255,255,0.08)",
+                borderRadius: 20,
+                fontSize: 14,
+                color: DESIGN_TOKENS.colors.text.secondary,
+                border: "1px solid rgba(255,255,255,0.1)",
+                transform: `translateY(${interpolate(
+                  frame,
+                  [65 + i * 4, 80 + i * 4],
+                  [10, 0],
+                  { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: micro.easing }
+                )}px)`,
+                opacity: interpolate(
+                  frame,
+                  [65 + i * 4, 80 + i * 4],
+                  [0, 1],
+                  { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: micro.easing }
+                ),
+              }}
+            >
+              <Icon size={16} />
+              <span>{text}</span>
             </div>
           ))}
         </div>
 
         {/* Credits */}
-        <div style={{
-          marginTop: 50,
-          fontSize: 16,
-          color: "rgba(255,255,255,0.4)",
-          opacity: interpolate(frame, [100, 120], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }),
-        }}>
+        <div
+          style={{
+            marginTop: 40,
+            fontSize: 14,
+            color: DESIGN_TOKENS.colors.text.muted,
+            opacity: interpolate(frame, [80, 95], [0, 1], {
+              extrapolateLeft: "clamp",
+              extrapolateRight: "clamp",
+              easing: standard.easing,
+            }),
+          }}
+        >
           Made with ❤️ using Remotion
         </div>
       </div>
 
       {/* Bottom gradient fade */}
-      <div style={{
-        position: "absolute",
-        bottom: 0,
-        left: 0,
-        right: 0,
-        height: 200,
-        background: "linear-gradient(to top, rgba(26,26,46,0.8), transparent)",
-        pointerEvents: "none",
-      }} />
+      <div
+        style={{
+          position: "absolute",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: 150,
+          background: `linear-gradient(to top, ${DESIGN_TOKENS.colors.background.start}cc, transparent)`,
+          pointerEvents: "none",
+        }}
+      />
     </div>
   );
 };

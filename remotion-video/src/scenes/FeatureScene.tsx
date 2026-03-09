@@ -1,149 +1,220 @@
-import { useCurrentFrame, useVideoConfig, interpolate, Easing, spring } from "remotion";
+import { useCurrentFrame, useVideoConfig, interpolate, Easing } from "remotion";
+import { DESIGN_TOKENS } from "../Video";
+import { IconVolume2, IconBrain, IconLanguages, IconTrophy } from "../components/Icons";
 
 export const FeatureScene: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
+  const { micro, standard } = DESIGN_TOKENS.animation;
+
+  // Features with Lucide icons (no emoji for professional look)
   const features = [
     {
-      icon: "🔊",
+      Icon: IconVolume2,
       title: "AI 語音回覆",
-      desc: "使用 edge-tts，JennyNeural 語音為你朗讀回覆，邊聽邊學",
-      color: "#4ecdc4",
+      desc: "edge-tts JennyNeural 語音為你朗讀回覆",
       highlight: "自然發音",
+      gridArea: "span 2 / span 2", // Large card (Bento Grid)
     },
     {
-      icon: "🧠",
+      Icon: IconBrain,
       title: "智能記憶",
-      desc: "Per-chat 對話記憶，記住你們的對話脈絡，聊天更連貫",
-      color: "#ff6b6b",
+      desc: "Per-chat 記憶，10輪對話脈絡",
       highlight: "10輪記憶",
+      gridArea: "span 1 / span 1",
     },
     {
-      icon: "🌏",
+      Icon: IconLanguages,
       title: "中英文混合",
-      desc: "說中文、破碎英文都沒問題，Baby Lobster 會理解並幫你修正",
-      color: "#ffe66d",
+      desc: "理解中文、破碎英文並幫你修正",
       highlight: "無障礙溝通",
+      gridArea: "span 1 / span 1",
     },
     {
-      icon: "🎉",
+      Icon: IconTrophy,
       title: "鼓勵教學",
-      desc: "像熱情的寶寶龍蝦一樣，用愛與耐心陪伴你的英文學習旅程",
-      color: "#a8e6cf",
+      desc: "像熱情的寶寶龍蝦，用愛與耐心陪伴",
       highlight: "正面激勵",
+      gridArea: "span 2 / span 2", // Large card
     },
   ];
 
+  // Header animation
+  const headerOpacity = interpolate(frame, [0, standard.frames], [0, 1], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+    easing: standard.easing,
+  });
+  const headerY = interpolate(frame, [0, standard.frames], [20, 0], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+    easing: standard.easing,
+  });
+
   return (
-    <div style={{
-      width: "100%",
-      height: "100%",
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      padding: "60px 80px",
-    }}>
+    <div
+      style={{
+        width: "100%",
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        padding: "80px 120px",
+        zIndex: DESIGN_TOKENS.zIndex.content,
+      }}
+    >
       {/* Header */}
-      <div style={{
-        textAlign: "center",
-        marginBottom: 50,
-      }}>
-        <h2 style={{
-          fontSize: 56,
-          fontWeight: 800,
-          color: "#fff",
-          margin: 0,
-          opacity: interpolate(frame, [0, 20], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }),
-          transform: `translateY(${interpolate(frame, [0, 20], [30, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" })}px)`,
-          textShadow: "0 0 50px rgba(78, 205, 196, 0.5)",
-        }}>
-          ✨ 強大功能一覽
+      <div
+        style={{
+          textAlign: "center",
+          marginBottom: 60,
+          opacity: headerOpacity,
+          transform: `translateY(${headerY}px)`,
+        }}
+      >
+        <h2
+          style={{
+            fontSize: DESIGN_TOKENS.typography.hero.size,
+            fontWeight: DESIGN_TOKENS.typography.hero.weight,
+            color: DESIGN_TOKENS.colors.text.primary,
+            margin: 0,
+            textShadow: `0 0 50px ${DESIGN_TOKENS.colors.primary}50`,
+          }}
+        >
+          強大功能一覽
         </h2>
-        <p style={{
-          fontSize: 24,
-          color: "rgba(255,255,255,0.7)",
-          marginTop: 15,
-          opacity: interpolate(frame, [10, 30], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }),
-        }}>
+        <p
+          style={{
+            fontSize: DESIGN_TOKENS.typography.subtitle.size,
+            color: DESIGN_TOKENS.colors.text.secondary,
+            marginTop: DESIGN_TOKENS.spacing.md,
+          }}
+        >
           讓英文學習變得有趣又高效
         </p>
       </div>
 
-      {/* Features Grid */}
-      <div style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(2, 1fr)",
-        gap: 30,
-        maxWidth: 1400,
-      }}>
+      {/* Bento Grid Layout (Style #46) */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(4, 1fr)",
+          gridTemplateRows: "repeat(2, 1fr)",
+          gap: 24,
+          width: "100%",
+          maxWidth: 1200,
+        }}
+      >
         {features.map((feature, i) => {
-          const delay = i * 10;
-          const opacity = interpolate(frame, [20 + delay, 40 + delay], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-          const scale = interpolate(frame, [20 + delay, 40 + delay], [0.9, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-          const y = interpolate(frame, [20 + delay, 40 + delay], [30, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+          const delay = 15 + i * 6;
+          const opacity = interpolate(
+            frame,
+            [delay, delay + standard.frames],
+            [0, 1],
+            { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: standard.easing }
+          );
+          const scale = interpolate(
+            frame,
+            [delay, delay + standard.frames],
+            [0.95, 1],
+            { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: standard.easing }
+          );
+          const y = interpolate(
+            frame,
+            [delay, delay + standard.frames],
+            [20, 0],
+            { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: standard.easing }
+          );
+
+          const isLarge = feature.gridArea.includes("span 2");
 
           return (
-            <div key={i} style={{
-              padding: 40,
-              background: "linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02))",
-              borderRadius: 24,
-              border: `2px solid ${feature.color}30`,
-              opacity,
-              transform: `scale(${scale}) translateY(${y}px)`,
-              backdropFilter: "blur(10px)",
-              position: "relative",
-              overflow: "hidden",
-            }}>
-              {/* Glow effect */}
-              <div style={{
-                position: "absolute",
-                top: -100,
-                right: -100,
-                width: 200,
-                height: 200,
-                background: `radial-gradient(circle, ${feature.color}30, transparent)`,
-                borderRadius: "50%",
-              }} />
+            <div
+              key={i}
+              style={{
+                gridArea: feature.gridArea,
+                padding: isLarge ? "40px" : "32px",
+                background: `linear-gradient(135deg, ${DESIGN_TOKENS.colors.primary}15, ${DESIGN_TOKENS.colors.secondary}08)`,
+                borderRadius: 24,
+                border: `1px solid ${DESIGN_TOKENS.colors.primary}25`,
+                opacity,
+                transform: `scale(${scale}) translateY(${y}px)`,
+                backdropFilter: "blur(10px)",
+                position: "relative",
+                overflow: "hidden",
+                boxShadow: `
+                  0 8px 32px rgba(0,0,0,0.2),
+                  inset 0 1px 0 rgba(255,255,255,0.1)
+                `,
+                transition: "transform 150ms ease-out, box-shadow 150ms ease-out",
+              }}
+            >
+              {/* Gradient orb background */}
+              <div
+                style={{
+                  position: "absolute",
+                  top: -50,
+                  right: -50,
+                  width: 150,
+                  height: 150,
+                  background: `radial-gradient(circle, ${DESIGN_TOKENS.colors.primary}30, transparent)`,
+                  borderRadius: "50%",
+                }}
+              />
 
               {/* Highlight badge */}
-              <div style={{
-                position: "absolute",
-                top: 20,
-                right: 20,
-                padding: "6px 14px",
-                background: `${feature.color}25`,
-                borderRadius: 20,
-                fontSize: 13,
-                fontWeight: 600,
-                color: feature.color,
-                border: `1px solid ${feature.color}40`,
-              }}>
+              <div
+                style={{
+                  position: "absolute",
+                  top: 20,
+                  right: 20,
+                  padding: "6px 14px",
+                  background: `${DESIGN_TOKENS.colors.accent}25`,
+                  borderRadius: 20,
+                  fontSize: 12,
+                  fontWeight: 600,
+                  color: DESIGN_TOKENS.colors.accent,
+                  border: `1px solid ${DESIGN_TOKENS.colors.accent}40`,
+                }}
+              >
                 {feature.highlight}
               </div>
 
-              <div style={{
-                fontSize: 64,
-                marginBottom: 20,
-              }}>
-                {feature.icon}
+              <div
+                style={{
+                  marginBottom: 16,
+                  position: "relative",
+                  zIndex: 1,
+                  color: DESIGN_TOKENS.colors.primaryLight,
+                }}
+              >
+                <feature.Icon size={isLarge ? 56 : 44} />
               </div>
 
-              <h3 style={{
-                fontSize: 28,
-                fontWeight: 700,
-                color: "#fff",
-                margin: "0 0 15px 0",
-              }}>
+              <h3
+                style={{
+                  fontSize: isLarge ? 28 : 22,
+                  fontWeight: 700,
+                  color: DESIGN_TOKENS.colors.text.primary,
+                  margin: "0 0 12px 0",
+                  position: "relative",
+                  zIndex: 1,
+                }}
+              >
                 {feature.title}
               </h3>
 
-              <p style={{
-                fontSize: 18,
-                color: "rgba(255,255,255,0.75)",
-                margin: 0,
-                lineHeight: 1.6,
-              }}>
+              <p
+                style={{
+                  fontSize: isLarge ? 18 : 15,
+                  color: DESIGN_TOKENS.colors.text.secondary,
+                  margin: 0,
+                  lineHeight: 1.6,
+                  position: "relative",
+                  zIndex: 1,
+                }}
+              >
                 {feature.desc}
               </p>
             </div>
@@ -152,34 +223,58 @@ export const FeatureScene: React.FC = () => {
       </div>
 
       {/* Bottom stats */}
-      <div style={{
-        display: "flex",
-        gap: 60,
-        marginTop: 50,
-        opacity: interpolate(frame, [70, 90], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }),
-      }}>
+      <div
+        style={{
+          display: "flex",
+          gap: 80,
+          marginTop: 60,
+          opacity: interpolate(frame, [60, 75], [0, 1], {
+            extrapolateLeft: "clamp",
+            extrapolateRight: "clamp",
+            easing: standard.easing,
+          }),
+        }}
+      >
         {[
-          { value: "100%", label: "英文回覆", color: "#ff6b6b" },
-          { value: "24/7", label: "隨時在線", color: "#4ecdc4" },
-          { value: "🦞", label: "可愛夥伴", color: "#ffe66d" },
+          { value: "100%", label: "英文回覆", color: DESIGN_TOKENS.colors.primary },
+          { value: "24/7", label: "隨時在線", color: DESIGN_TOKENS.colors.secondary },
+          { value: "🦞", label: "可愛夥伴", color: DESIGN_TOKENS.colors.accent },
         ].map((stat, i) => (
-          <div key={i} style={{
-            textAlign: "center",
-            transform: `translateY(${interpolate(frame, [70 + i * 5, 90 + i * 5], [20, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" })}px)`,
-          }}>
-            <div style={{
-              fontSize: 42,
-              fontWeight: 900,
-              color: stat.color,
-              textShadow: `0 0 30px ${stat.color}50`,
-            }}>
+          <div
+            key={i}
+            style={{
+              textAlign: "center",
+              transform: `translateY(${interpolate(
+                frame,
+                [65 + i * 3, 80 + i * 3],
+                [15, 0],
+                { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: micro.easing }
+              )}px)`,
+              opacity: interpolate(
+                frame,
+                [65 + i * 3, 80 + i * 3],
+                [0, 1],
+                { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: micro.easing }
+              ),
+            }}
+          >
+            <div
+              style={{
+                fontSize: 42,
+                fontWeight: 900,
+                color: stat.color,
+                textShadow: `0 0 30px ${stat.color}50`,
+              }}
+            >
               {stat.value}
             </div>
-            <div style={{
-              fontSize: 16,
-              color: "rgba(255,255,255,0.6)",
-              marginTop: 8,
-            }}>
+            <div
+              style={{
+                fontSize: 14,
+                color: DESIGN_TOKENS.colors.text.muted,
+                marginTop: 8,
+              }}
+            >
               {stat.label}
             </div>
           </div>

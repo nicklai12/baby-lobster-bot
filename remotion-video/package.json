@@ -10,13 +10,14 @@
   "dependencies": {
     "@remotion/cli": "^4.0.0",
     "@remotion/player": "^4.0.0",
+    "lucide-react": "^0.577.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "remotion": "^4.0.0"
   },
   "devDependencies": {
-    "@types/react": "^18.0.0",
     "@types/node": "^20.0.0",
+    "@types/react": "^18.0.0",
     "typescript": "^5.0.0"
   }
 }
