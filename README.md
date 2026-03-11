@@ -38,7 +38,7 @@ FastAPI Server (Render Web Service)
 ├── config.py             # pydantic-settings 環境變數管理
 ├── handlers.py           # Telegram 訊息處理（text / voice 分支）
 ├── services/
-│   ├── memory.py         # Per-chat 對話記憶（deque-based）
+│   ├── memory.py         # Per-chat 對話記憶（Supabase 持久化 + in-memory fallback）
 │   ├── stt.py            # Groq Whisper 語音轉文字
 │   ├── ai.py             # Cerebras AI 對話（含 Baby Lobster system prompt + 429 自動重試）
 │   └── tts.py            # edge-tts 文字轉語音（Python API，非 CLI）
@@ -64,6 +64,8 @@ cp .env.example .env
 | `GROQ_API_KEY` | ✅ | 從 [console.groq.com](https://console.groq.com) 取得 |
 | `CEREBRAS_API_KEY` | ✅ | 從 [cloud.cerebras.ai](https://cloud.cerebras.ai) 取得 |
 | `WEBHOOK_URL` | ✅ | Render 部署後的公開 URL，例如 `https://baby-lobster-bot.onrender.com` |
+| `SUPABASE_URL` | ✅ | Supabase 專案 URL，從 Settings → API 取得 |
+| `SUPABASE_KEY` | ✅ | Supabase `service_role` key（非 anon key），從 Settings → API 取得 |
 | `TTS_VOICE` | ➖ | edge-tts 語音，預設 `en-US-JennyNeural` || `PORT` | ➕ | 服務器監聽的 Port，預設 `3000`（Render 會自動覆寫） || `MAX_HISTORY` | ➖ | 每個 chat 保留的對話輪數，預設 `10` |
 | `SYSTEM_PROMPT` | ➖ | AI 系統提示詞，不設定則使用內建 Baby Lobster 角色設定 |
 
@@ -138,3 +140,4 @@ uvicorn main:app --reload  # 預設使用 PORT=3000
 
 - **AI 429 自動重試：** `services/ai.py` 內建 exponential backoff，遇到 Cerebras API 429 (rate limit) 時自動等待 2s → 4s → 8s 重試，最多 3 次。
 - **edge-tts 版本：** 需使用 7.x 以上版本（目前 7.2.7），6.x 版會因 TrustedClientToken 過期導致 403 錯誤。
+- **對話記憶持久化：** 使用 Supabase PostgreSQL（免費方案 500MB）儲存對話紀錄，Render 休眠或重新部署後對話不遺失。若 Supabase 連線失敗會自動 fallback 到 in-memory 模式。

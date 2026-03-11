@@ -20,3 +20,7 @@ services:
         value: en-US-JennyNeural
       - key: MAX_HISTORY
         value: "10"
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_KEY
+        sync: false

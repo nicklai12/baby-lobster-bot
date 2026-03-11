@@ -28,6 +28,8 @@ class Settings(BaseSettings):
     TTS_VOICE: str = "en-US-JennyNeural"
     MAX_HISTORY: int = 10
     SYSTEM_PROMPT: str = _DEFAULT_SYSTEM_PROMPT
+    SUPABASE_URL: str = ""
+    SUPABASE_KEY: str = ""
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
