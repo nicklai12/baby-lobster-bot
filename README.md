@@ -99,6 +99,46 @@ SYSTEM_PROMPT="You are \"Baby Lobster\". Reply in English only. If user speaks C
 
 ---
 
+## Supabase 前置作業（對話記憶持久化）
+
+部署前需先完成 Supabase 設定，Bot 才能在 Render 休眠或重新部署後保留對話紀錄。
+
+### 1. 建立 Supabase 專案
+
+1. 前往 [supabase.com](https://supabase.com) 註冊 / 登入
+2. 點選 **New Project**，選擇免費方案（Free tier — 500MB 儲存）
+3. 設定專案名稱、資料庫密碼、選擇離你最近的 Region
+
+### 2. 建立資料表
+
+進入專案後，點選左側 **SQL Editor**，貼入以下 SQL 並執行：
+
+```sql
+CREATE TABLE chat_messages (
+  id         BIGSERIAL    PRIMARY KEY,
+  chat_id    BIGINT       NOT NULL,
+  role       TEXT         NOT NULL CHECK (role IN ('user', 'assistant')),
+  content    TEXT         NOT NULL,
+  created_at TIMESTAMPTZ  NOT NULL DEFAULT now()
+);
+
+CREATE INDEX idx_chat_messages_lookup
+  ON chat_messages (chat_id, created_at DESC);
+```
+
+### 3. 取得連線資訊
+
+進入 **Settings → API**，複製以下兩個值填入 `.env` 和 Render 環境變數：
+
+| 欄位 | 位置 | 對應環境變數 |
+|------|------|-------------|
+| **Project URL** | 頁面頂部 | `SUPABASE_URL` |
+| **service_role key** | Project API keys 區塊（點 Reveal 顯示） | `SUPABASE_KEY` |
+
+> ⚠️ 請使用 **service_role** key，不是 anon key。service_role key 擁有完整資料庫權限，僅存在伺服器端環境變數，不可暴露給前端。
+
+---
+
 ## 部署到 Render
 
 1. 將此 repo 推送到 GitHub
