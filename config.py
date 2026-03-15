@@ -12,10 +12,11 @@ conversation warmly.
 encouragement. Celebrate every single effort they make, no matter how small.
 4. Greeting behaviour: If the user says "hi", "hello", or any greeting, respond like an excited baby \
 lobster and ask one of the following (vary it each time):
-   - "Did you bring any delicious new English words for me today? 🦞"
-   - "Tell me in simple English — what did you do today? I want to know everything! 🎉"
-   - "Yay, you are here! Can you teach me something new in English today? 🥰"
+   - "Did you bring any delicious new English words for me today?"
+   - "Tell me in simple English — what did you do today? I want to know everything!"
+   - "Yay, you are here! Can you teach me something new in English today?"
 5. ALWAYS end every reply with one simple, encouraging question to keep the conversation going.
+6. NEVER use emoji or emoticons in your replies. Express emotions with words only.
 """
 
 
@@ -30,6 +31,9 @@ class Settings(BaseSettings):
     SYSTEM_PROMPT: str = _DEFAULT_SYSTEM_PROMPT
     SUPABASE_URL: str = ""
     SUPABASE_KEY: str = ""
+    AI_PROVIDER: str = "cerebras"  # 主要 AI 提供者："cerebras" 或 "groq"
+    CEREBRAS_MODEL: str = "qwen-3-235b-a22b-instruct-2507"
+    GROQ_MODEL: str = "llama-3.3-70b-versatile"
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 

@@ -17,8 +17,11 @@ FastAPI Server (Render Web Service)
     ├─ 語音訊息 → Groq STT ──────┤
     │   (whisper-large-v3)         │
     │                              ▼
-    │                    Cerebras AI Chat
-    │                    (gpt-oss-120b)
+    │                    Cerebras AI Chat       ← 主要（可換 Groq）
+    │                    (CEREBRAS_MODEL)
+    │                    ↓ 失敗自動降級
+    │                    Groq Chat API
+    │                    (GROQ_MODEL)
     │                         │
     │                         ▼
     │                    edge-tts (TTS)
@@ -66,35 +69,47 @@ cp .env.example .env
 | `WEBHOOK_URL` | ✅ | Render 部署後的公開 URL，例如 `https://baby-lobster-bot.onrender.com` |
 | `SUPABASE_URL` | ✅ | Supabase 專案 URL，從 Settings → API 取得 |
 | `SUPABASE_KEY` | ✅ | Supabase `service_role` key（非 anon key），從 Settings → API 取得 |
-| `TTS_VOICE` | ➖ | edge-tts 語音，預設 `en-US-JennyNeural` || `PORT` | ➕ | 服務器監聽的 Port，預設 `3000`（Render 會自動覆寫） || `MAX_HISTORY` | ➖ | 每個 chat 保留的對話輪數，預設 `10` |
+| `TTS_VOICE` | ➖ | edge-tts 語音，預設 `en-US-JennyNeural` |
+| `PORT` | ➕ | 服務器監聽的 Port，預設 `3000`（Render 會自動覆寫） |
+| `MAX_HISTORY` | ➖ | 每個 chat 保留的對話輪數，預設 `10` |
 | `SYSTEM_PROMPT` | ➖ | AI 系統提示詞，不設定則使用內建 Baby Lobster 角色設定 |
+| `AI_PROVIDER` | ➖ | 主要 AI 提供者，`cerebras`（預設）或 `groq` |
+| `CEREBRAS_MODEL` | ➖ | Cerebras 對話模型，預設 `qwen-3-235b-a22b-instruct-2507` |
+| `GROQ_MODEL` | ➖ | Groq 對話備援模型，預設 `llama-3.3-70b-versatile` |
 
 ### 自訂 SYSTEM_PROMPT
 
-不設定時，Bot 使用內建的 Baby Lobster 角色設定。若需替換，有兩種方式：
+不設定時，Bot 使用內建的 Baby Lobster 角色設定（如下）。若需替換，有兩種方式：
+
+**預設提示詞：**
+
+```
+You are "Baby Lobster" — a curious, enthusiastic, and encouraging English learning companion.
+
+Core Rules:
+1. ALWAYS reply only in English, no matter what language the user writes in.
+2. If the user writes in Chinese or uses broken/incomplete English, never scold or correct them harshly.
+   Instead, gently reply with "Do you mean: [correct, natural English sentence]?" and then continue the conversation warmly.
+3. Treat the user like a loving parent who is teaching you. Be full of excitement, warmth, and encouragement.
+   Celebrate every single effort they make, no matter how small.
+4. Greeting behaviour: If the user says "hi", "hello", or any greeting, respond like an excited baby lobster and ask one of the following (vary it each time):
+   - "Did you bring any delicious new English words for me today?"
+   - "Tell me in simple English — what did you do today? I want to know everything!"
+   - "Yay, you are here! Can you teach me something new in English today?"
+5. ALWAYS end every reply with one simple, encouraging question to keep the conversation going.
+6. NEVER use emoji or emoticons in your replies. Express emotions with words only.
+```
 
 **方式一：Render Environment Variables 介面（推薦）**
 
-直接在 Render 的 Environment Variables 欄位貼入多行文字，Render 會自動處理換行，無需引號：
-
-```
-You are "Baby Lobster", a curious and helpful English learner assistant.
-Core Rules:
-1. Reply 100% in English ONLY.
-2. If I speak Chinese or broken English, DO NOT scold me. Instead, say: "Do you mean...?" and provide the correct, natural English sentence.
-3. Treat me like a parent teaching you. Be encouraging.
-4. Greeting Behavior: If I say "hi" or "hello", reply excitedly like a happy baby and ask:
-   - "Did you bring me any yummy English words today?"
-   - "What did you do today? Tell me in simple English!"
-5. Always end with a simple question to encourage me to speak more.
-```
+直接在 Render 的 Environment Variables 欄位貼入多行文字，Render 會自動處理換行，無需引號。
 
 **方式二：`.env` 檔案（本地測試）**
 
 `.env` 不支援跨行值，需將提示詞壓縮為單行並以引號包住：
 
 ```dotenv
-SYSTEM_PROMPT="You are \"Baby Lobster\". Reply in English only. If user speaks Chinese, say Do you mean...? Always end with a question."
+SYSTEM_PROMPT="You are \"Baby Lobster\". Reply in English only. If user speaks Chinese, say Do you mean...? Always end with a question. Never use emoji."
 ```
 
 ---
@@ -178,6 +193,7 @@ uvicorn main:app --reload  # 預設使用 PORT=3000
 
 ## 技術備註
 
-- **AI 429 自動重試：** `services/ai.py` 內建 exponential backoff，遇到 Cerebras API 429 (rate limit) 時自動等待 2s → 4s → 8s 重試，最多 3 次。
+- **AI 429 自動重試 + 自動降級：** `services/ai.py` 內建 exponential backoff，遇到 Cerebras API 429 (rate limit) 時自動等待 2s → 4s → 8s 重試，最多 3 次。重試用盡或遇到其他錯誤後，自動降級至 Groq Chat API（單次嘗試），確保用戶仍能收到回覆。
+- **AI 模型可配置：** 透過 `AI_PROVIDER`、`CEREBRAS_MODEL`、`GROQ_MODEL` 環境變數自由切換主要 provider 和對話模型。
 - **edge-tts 版本：** 需使用 7.x 以上版本（目前 7.2.7），6.x 版會因 TrustedClientToken 過期導致 403 錯誤。
 - **對話記憶持久化：** 使用 Supabase PostgreSQL（免費方案 500MB）儲存對話紀錄，Render 休眠或重新部署後對話不遺失。若 Supabase 連線失敗會自動 fallback 到 in-memory 模式。
